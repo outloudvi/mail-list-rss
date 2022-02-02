@@ -19,6 +19,7 @@ pub struct Feed {
     pub author: String,
     pub content: String,
     pub raw: String,
+    pub from_box: String,
 }
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -135,12 +136,14 @@ impl<'a> TryFrom<(&'a Vec<u8>, Message<'a>)> for Feed {
             .get_html_bodies()
             .flat_map(|x| x.get_contents().to_vec())
             .collect::<Vec<_>>();
+        let from_box = val.get_to().as_text_ref().unwrap_or("unknown").to_owned();
         Ok(Feed {
             raw: String::from_utf8(raw.to_owned())?,
             content: String::from_utf8(content)?,
             created_at,
             title,
             author,
+            from_box,
             id: nanoid::nanoid!(10),
         })
     }

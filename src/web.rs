@@ -16,7 +16,10 @@ use axum::{
 use axum_extra::middleware::{middleware_fn, Next};
 use chrono::Utc;
 use futures::{StreamExt, TryStreamExt};
-use mongodb::{bson::doc, options::FindOptions};
+use mongodb::{
+    bson::{doc, Document},
+    options::FindOptions,
+};
 use tower_http::{
     auth::RequireAuthorizationLayer,
     cors,
@@ -94,6 +97,7 @@ pub async fn web_server(collection: Feeds) -> Result<()> {
         .route("/feeds/:key", get(raw))
         .route("/feeds", get(list.layer(utf8_layer)))
         .route("/rss", get(rss))
+        .route("/rss/:email", get(rss_box))
         .layer(AddExtensionLayer::new(collection))
         .layer(
             TraceLayer::new_for_http()
@@ -143,7 +147,7 @@ async fn index() -> impl IntoResponse {
 }
 
 async fn rss(Extension(feed): Extension<Feeds>) -> impl IntoResponse {
-    match render_feeds(feed).await {
+    match render_feeds(feed, None).await {
         Ok(content) => (
             StatusCode::OK,
             Headers(vec![(
@@ -160,14 +164,36 @@ async fn rss(Extension(feed): Extension<Feeds>) -> impl IntoResponse {
     }
 }
 
-async fn render_feeds(feeds: Feeds) -> Result<String> {
+async fn rss_box(
+    Path(map): Path<HashMap<String, String>>,
+    Extension(feed): Extension<Feeds>,
+) -> impl IntoResponse {
+    let email = map.get("email").expect("email should exist");
+    match render_feeds(feed, Some(doc! { "from_box": email })).await {
+        Ok(content) => (
+            StatusCode::OK,
+            Headers(vec![(
+                header::CONTENT_TYPE,
+                "application/xml; charset=utf-8",
+            )]),
+            content,
+        ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Headers(vec![]),
+            e.to_string(),
+        ),
+    }
+}
+
+async fn render_feeds(feeds: Feeds, filter: Option<Document>) -> Result<String> {
     let config = get_config();
     let option = FindOptions::builder()
         .limit(config.per_page as i64)
         .sort(doc! { "created_at": -1 })
         .build();
     let feeds = feeds
-        .find(None, option)
+        .find(filter, option)
         .await?
         .try_fold(Vec::with_capacity(10), |mut acc, x| async move {
             acc.push(x.into_rss());
