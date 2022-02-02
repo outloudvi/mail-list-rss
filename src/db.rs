@@ -136,7 +136,7 @@ impl<'a> TryFrom<(&'a Vec<u8>, Message<'a>)> for Feed {
             .get_html_bodies()
             .flat_map(|x| x.get_contents().to_vec())
             .collect::<Vec<_>>();
-        let from_box = val.get_to().as_text_ref().unwrap_or("unknown").to_owned();
+        let from_box = get_email(val.get_to(), &config.domain);
         Ok(Feed {
             raw: String::from_utf8(raw.to_owned())?,
             content: String::from_utf8(content)?,
@@ -146,6 +146,33 @@ impl<'a> TryFrom<(&'a Vec<u8>, Message<'a>)> for Feed {
             from_box,
             id: nanoid::nanoid!(10),
         })
+    }
+}
+
+fn get_email(get_to: &HeaderValue, domain: &str) -> String {
+    match get_to {
+        HeaderValue::Address(a) => match &a.address {
+            Some(x) => x.to_string(),
+            None => "unknown".to_string(),
+        },
+        HeaderValue::AddressList(al) => {
+            let mut addresses = al
+                .iter()
+                .map(|x| x.address.as_ref())
+                .filter(|x| x.is_some())
+                .map(|x| x.unwrap())
+                .collect::<Vec<_>>();
+            if addresses.is_empty() {
+                "unknown".to_string()
+            } else {
+                addresses.sort();
+                match addresses.iter().filter(|x| x.contains(domain)).next() {
+                    Some(x) => x.to_string(),
+                    None => addresses.first().unwrap().to_string(),
+                }
+            }
+        }
+        _ => "unknown".to_string(),
     }
 }
 
