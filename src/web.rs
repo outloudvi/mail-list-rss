@@ -148,7 +148,8 @@ async fn index() -> impl IntoResponse {
 }
 
 async fn rss(Extension(feed): Extension<Feeds>) -> impl IntoResponse {
-    match render_feeds(feed, None).await {
+    let config = get_config();
+    match render_feeds(feed, None, &format!("https://{}/rss", config.domain)).await {
         Ok(content) => (
             StatusCode::OK,
             Headers(vec![(
@@ -169,8 +170,15 @@ async fn rss_box(
     Path(map): Path<HashMap<String, String>>,
     Extension(feed): Extension<Feeds>,
 ) -> impl IntoResponse {
+    let config = get_config();
     let email = map.get("box").expect("box name should exist");
-    match render_feeds(feed, Some(doc! { "from_box": email })).await {
+    match render_feeds(
+        feed,
+        Some(doc! { "from_box": email }),
+        &format!("https://{}/rss/{}", config.domain, email),
+    )
+    .await
+    {
         Ok(content) => (
             StatusCode::OK,
             Headers(vec![(
@@ -187,7 +195,7 @@ async fn rss_box(
     }
 }
 
-async fn render_feeds(feeds: Feeds, filter: Option<Document>) -> Result<String> {
+async fn render_feeds(feeds: Feeds, filter: Option<Document>, link: &str) -> Result<String> {
     let config = get_config();
     let option = FindOptions::builder()
         .limit(config.per_page as i64)
@@ -205,7 +213,7 @@ async fn render_feeds(feeds: Feeds, filter: Option<Document>) -> Result<String> 
     let ret = rss::ChannelBuilder::default()
         .title("Mail List")
         .generator(Some("http://github.com/George-Miao/mail-list-rss".into()))
-        .link("http://github.com/George-Miao/mail-list-rss")
+        .link(link)
         .pub_date(Utc::now().to_rfc2822())
         .items(feeds)
         .build()
