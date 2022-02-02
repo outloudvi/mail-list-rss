@@ -18,7 +18,7 @@ use chrono::Utc;
 use futures::{StreamExt, TryStreamExt};
 use mongodb::{
     bson::{doc, Document},
-    options::FindOptions,
+    options::{DistinctOptions, FindOptions},
 };
 use tower_http::{
     auth::RequireAuthorizationLayer,
@@ -97,7 +97,8 @@ pub async fn web_server(collection: Feeds) -> Result<()> {
         .route("/feeds/:key", get(raw))
         .route("/feeds", get(list.layer(utf8_layer)))
         .route("/rss", get(rss))
-        .route("/rss/:email", get(rss_box))
+        .route("/rss/:box", get(rss_box))
+        .route("/boxes", get(boxes))
         .layer(AddExtensionLayer::new(collection))
         .layer(
             TraceLayer::new_for_http()
@@ -168,7 +169,7 @@ async fn rss_box(
     Path(map): Path<HashMap<String, String>>,
     Extension(feed): Extension<Feeds>,
 ) -> impl IntoResponse {
-    let email = map.get("email").expect("email should exist");
+    let email = map.get("box").expect("box name should exist");
     match render_feeds(feed, Some(doc! { "from_box": email })).await {
         Ok(content) => (
             StatusCode::OK,
@@ -255,6 +256,32 @@ async fn raw(
             Headers(vec![]),
             format!("Cannot find {}", key),
         ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Headers(vec![]),
+            e.to_string(),
+        ),
+    }
+}
+
+async fn boxes(Extension(feed): Extension<Feeds>) -> impl IntoResponse {
+    let option = DistinctOptions::builder().build();
+    let emails = feed.distinct("from_box", None, option).await;
+    match emails {
+        Ok(content) => {
+            let emails_text = content
+                .iter()
+                .map(|f| f.as_str().unwrap())
+                .collect::<Vec<_>>();
+            (
+                StatusCode::OK,
+                Headers(vec![(
+                    header::CONTENT_TYPE,
+                    "application/json; charset=utf-8",
+                )]),
+                serde_json::to_string(&emails_text).unwrap(),
+            )
+        }
         Err(e) => (
             StatusCode::INTERNAL_SERVER_ERROR,
             Headers(vec![]),
