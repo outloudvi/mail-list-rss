@@ -113,12 +113,9 @@ impl<'a> TryFrom<(&'a Vec<u8>, Message<'a>)> for Feed {
     type Error = anyhow::Error;
     fn try_from((raw, val): (&'a Vec<u8>, Message<'a>)) -> Result<Self> {
         let config = get_config();
-        if !val
-            .get_to()
-            .to_vec()
-            .into_iter()
-            .any(|x| x.contains(&config.domain))
-        {
+        let domain_suffix = format!("@{}", config.domain);
+        let mut receivers = val.get_to().to_vec();
+        if !receivers.iter().any(|x| x.contains(&domain_suffix)) {
             bail!("Not sending to {}, blocked", config.domain)
         }
         let author = match val.get_from() {
