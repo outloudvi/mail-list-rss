@@ -13,20 +13,29 @@ pub struct Config {
     pub domain: String,
     pub mongo_con_str: String,
     pub mongo_db_name: String,
+    pub web_domain: String,
     pub username: Option<String>,
     pub password: Option<String>,
 }
 
 impl Config {
     pub fn from_env() -> Result<Self> {
+        let domain = var("DOMAIN").unwrap_or_else(|_| "example.com".to_owned());
         let ret = Self {
             web_port: var("WEB_PORT").map_or_else(|_| Ok(8080), |x| x.parse())?,
             smtp_port: var("SMTP_PORT").map_or_else(|_| Ok(10000), |x| x.parse())?,
             per_page: var("PER_PAGE").map_or_else(|_| Ok(10), |x| x.parse())?,
-            domain: var("DOMAIN").unwrap_or_else(|_| "example.com".to_owned()),
+            domain: domain.clone(),
             mongo_con_str: var("MONGO_CON_STR")
                 .unwrap_or_else(|_| "mongodb://localhost:27017".to_owned()),
             mongo_db_name: var("MONGO_DB_NAME").unwrap_or_else(|_| "mail-list-rss".to_owned()),
+            web_domain: var("WEB_DOMAIN").map_or(domain.clone(), |x| {
+                if x.is_empty() {
+                    domain.clone()
+                } else {
+                    x
+                }
+            }),
             username: var("AUTH_USERNAME").ok(),
             password: var("AUTH_PASSWORD").ok(),
         };

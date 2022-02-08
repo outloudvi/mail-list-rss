@@ -56,7 +56,7 @@ async fn http_rediretor<B>(req: Request<B>, next: Next<B>) -> impl IntoResponse 
         Some(schema) if schema.to_str().map(|x| x != "https").unwrap_or(true) => {
             let mut parts = req.uri().clone().into_parts();
             parts.scheme = Some(Scheme::HTTPS);
-            parts.authority = Some(Authority::from_str(&config.domain).expect("Bad domain"));
+            parts.authority = Some(Authority::from_str(&config.web_domain).expect("Bad domain"));
             Err(Redirect::permanent(parts.try_into().unwrap()))
         }
         _ => Ok(next.run(req).await),
@@ -149,7 +149,7 @@ async fn index() -> impl IntoResponse {
 
 async fn rss(Extension(feed): Extension<Feeds>) -> impl IntoResponse {
     let config = get_config();
-    match render_feeds(feed, None, &format!("https://{}/rss", config.domain)).await {
+    match render_feeds(feed, None, &format!("https://{}/rss", config.web_domain)).await {
         Ok(content) => (
             StatusCode::OK,
             Headers(vec![(
@@ -175,7 +175,7 @@ async fn rss_box(
     match render_feeds(
         feed,
         Some(doc! { "from_box": email }),
-        &format!("https://{}/rss/{}", config.domain, email),
+        &format!("https://{}/rss/{}", config.web_domain, email),
     )
     .await
     {
