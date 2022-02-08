@@ -26,6 +26,3 @@ axum-extra         = "0.1.2"
 [profile.release]
 codegen-units = 1
 opt-level = 3
-
-[[bin]]
-name = "nginx-auth"
