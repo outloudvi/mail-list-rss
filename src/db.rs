@@ -33,12 +33,15 @@ impl Feed {
 
         let guid = GuidBuilder::default()
             .permalink(true)
-            .value(format!("https://{}/feeds/{}", config.domain, self.id))
+            .value(format!("{}", self.id))
             .build();
 
         ItemBuilder::default()
             .title(self.title)
-            .link(Some(format!("https://{}/feeds/{}", config.domain, self.id)))
+            .link(Some(format!(
+                "https://{}/feeds/{}",
+                config.web_domain, self.id
+            )))
             .author(Some(self.author))
             .pub_date(Some(self.created_at.to_rfc2822()))
             .guid(Some(guid))
