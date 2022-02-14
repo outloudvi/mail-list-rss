@@ -5,7 +5,7 @@ use once_cell::sync::Lazy;
 use serde_json::from_str;
 use tracing::warn;
 
-use crate::rule::Rule;
+use crate::rule::{Rule, RuleFilter};
 
 static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_env().unwrap());
 
@@ -21,10 +21,30 @@ pub struct Config {
     pub username: Option<String>,
     pub password: Option<String>,
     pub rules: Vec<Rule>,
+    pub disable_rcpt_filter: bool,
 }
 
 impl Config {
     pub fn from_env() -> Result<Self> {
+        let rules = match var("RULE_FILE") {
+            Ok(path) => match fs::read_to_string(path) {
+                Ok(text) => match from_str::<Vec<Rule>>(&text) {
+                    Ok(rules) => rules,
+                    Err(e) => {
+                        warn!("Error parsing rules: {}", e);
+                        vec![]
+                    }
+                },
+                Err(e) => {
+                    warn!("Error parsing rules: {}", e);
+                    vec![]
+                }
+            },
+            Err(e) => {
+                warn!("Error parsing rules: {}", e);
+                vec![]
+            }
+        };
         let domain = var("DOMAIN").unwrap_or_else(|_| "example.com".to_owned());
         let ret = Self {
             web_port: var("WEB_PORT").map_or_else(|_| Ok(8080), |x| x.parse())?,
@@ -43,25 +63,18 @@ impl Config {
             }),
             username: var("AUTH_USERNAME").ok(),
             password: var("AUTH_PASSWORD").ok(),
-            rules: match var("RULE_FILE") {
-                Ok(path) => match fs::read_to_string(path) {
-                    Ok(text) => match from_str::<Vec<Rule>>(&text) {
-                        Ok(rules) => rules,
-                        Err(e) => {
-                            warn!("Error parsing rules: {}", e);
-                            vec![]
-                        }
-                    },
-                    Err(e) => {
-                        warn!("Error parsing rules: {}", e);
-                        vec![]
-                    }
-                },
-                Err(e) => {
-                    warn!("Error parsing rules: {}", e);
-                    vec![]
-                }
-            },
+            disable_rcpt_filter: rules
+                .iter()
+                .filter(|rule| {
+                    rule.filter
+                        .iter()
+                        .filter(|fltr| matches!(fltr, RuleFilter::ByFrom(_)))
+                        .next()
+                        .is_some()
+                })
+                .next()
+                .is_some(),
+            rules,
         };
 
         if ret.username.is_some() ^ ret.password.is_some() {

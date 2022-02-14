@@ -37,9 +37,12 @@ impl SmtpConnection {
 
 impl Handler for SmtpConnection {
     fn rcpt(&mut self, to: &str) -> Response {
-        let domain = &get_config().domain;
+        let conf = &get_config();
+        if conf.disable_rcpt_filter {
+            return response::OK;
+        }
         //  Block any rcpt that's not on my domain
-        if to.contains(domain) {
+        if to.contains(&conf.domain) {
             response::OK
         } else {
             response::NO_SERVICE
