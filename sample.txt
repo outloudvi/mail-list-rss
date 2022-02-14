@@ -1,0 +1,523 @@
+Return-Path: <civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org>
+Received: from compute2.internal (compute2.nyi.internal [10.202.2.46])
+	 by sloti45n30 (Cyrus 3.5.0-alpha0-4585-ga9d9773056-fm-20220113.001-ga9d97730) with LMTPA;
+	 Wed, 02 Feb 2022 00:12:05 -0500
+X-Cyrus-Session-Id: sloti45n30-1643778725-3877350-2-1836270273028183109
+X-Sieve: CMU Sieve 3.0
+X-Spam-known-sender: no
+X-Spam-sender-reputation: 1000 (email; noauth)
+X-Spam-score: 0.0
+X-Spam-hits: HTML_FONT_LOW_CONTRAST 0.001, HTML_MESSAGE 0.001, ME_HAS_VSSU 0.001,
+  ME_NOAUTH 0.01, ME_SC_SENDERREP -100, ME_SENDERREP_ALLOW -4,
+  SHORTCIRCUIT -0.0001, SPF_HELO_NONE 0.001, SPF_SOFTFAIL 0.972,
+  LANGUAGES en, BAYES_USED none, SA_VERSION 3.4.2
+X-Spam-source: IP='116.202.120.186', Host='crm-int-01.torproject.org', Country='DE',
+  FromHeader='org', MailFrom='org'
+X-Spam-charsets: plain='utf-8', html='utf-8'
+X-Resolved-to: c659b3a055909f5a@fastmail.to
+X-Delivered-to: lists@outv.im
+X-Mail-from: civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org
+Received: from mx6 ([10.202.2.205])
+  by compute2.internal (LMTPProxy); Wed, 02 Feb 2022 00:12:05 -0500
+Received: from mx6.messagingengine.com (localhost [127.0.0.1])
+	by mailmx.nyi.internal (Postfix) with ESMTP id 0A052C800E7
+	for <lists@outv.im>; Wed,  2 Feb 2022 00:12:05 -0500 (EST)
+Received: from mx6.messagingengine.com (localhost [127.0.0.1])
+    by mx6.messagingengine.com (Authentication Milter) with ESMTP
+    id C6952946BB3;
+    Wed, 2 Feb 2022 00:12:05 -0500
+ARC-Seal: i=1; a=rsa-sha256; cv=none; d=messagingengine.com; s=fm2; t=
+    1643778725; b=ImWrfvTzOa2/3Dwy4GfgN3NTR46iGEAoFlO+bP3DYHMRI24Vkf
+    BCJDEUdkE+waRP2h7s0luPPKnlxY7bAi3iL61IErtN3/sLdL92Gyg8ic7JNttsby
+    OAzajjyU3VWhH1DBRIkFuwmzXMXEA4+kczYvmQ87z5nOnxpbTYydo3n++HB9f/jt
+    LBqjOXxuCWd+ApiXVk+BGV211Iv16+djGZpLBkuMGe9BbsQGbg092evw2cAiFqFp
+    TVeL4Yf2Qu1TGJOE+zb7jxcz0P8K7d9Qe/dasCcNOmF4hR970VQ4h6sn/NmF/1z+
+    6YhLwiTOZCuNR1AjN/pd8L2Kb+C+7skul7oA==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=
+    messagingengine.com; h=to:subject:mime-version:reply-to:from
+    :list-unsubscribe:content-type:date:message-id; s=fm2; t=
+    1643778725; bh=K+NcXCckMQRRC3gZiEB2YuyZyhCZjreAMksiD6GCfFI=; b=a
+    fpj3xhYTQdyEEczfqU5U5qdB3alit8e1oYnIbUlAYVaTkmM2I9iZ6ukhzT0Svky1
+    3mUVC8pLUg3zVTFIuxHVlCmGIHA0isZ1dRYrSb92JIFHPni779rAXUBDedPVWb33
+    d1mrQLBewLz1bg6kD40BmhR2qtLgo0loZHdZKEZlXv5DfPXG3uuuCfH8jynNzBrB
+    grKuTvYLAPqgfmtYqOTKbYfgUUWCaafVDbRvWLndNpz4xwbWtY61xfeeO44iqBlt
+    pGkbTL0Fa5Or62/HFP6NgVRiL4HUKdaN3T9GTiDPDUAawGWOxU+IJxuZB3uLk/SF
+    BeMeeGfGThKn3MCpU7tDA==
+ARC-Authentication-Results: i=1; mx6.messagingengine.com;
+    x-csa=none;
+    x-me-sender=none;
+    x-ptr=pass smtp.helo=crm-int-01.torproject.org
+    policy.ptr=crm-int-01.torproject.org;
+    bimi=skipped (DMARC did not pass);
+    arc=none (no signatures found);
+    dkim=none (no signatures found);
+    dmarc=none policy.published-domain-policy=none
+    policy.applied-disposition=none policy.evaluated-disposition=none
+    (p=none,d=none,d.eval=none) policy.policy-from=p
+    header.from=torproject.org;
+    iprev=pass smtp.remote-ip=116.202.120.186 (crm-int-01.torproject.org);
+    spf=softfail
+    smtp.mailfrom=
+    civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org
+    smtp.helo=crm-int-01.torproject.org
+X-ME-Authentication-Results: mx6.messagingengine.com;
+    x-aligned-from=orgdomain_pass (Domain org match);
+    x-return-mx=pass header.domain=torproject.org policy.is_org=yes
+      (MX Records found: eugeni.torproject.org);
+    x-return-mx=warn smtp.domain=crm.torproject.org
+      policy.org_domain=torproject.org policy.is_org=no
+      policy.mx_error=NOERROR policy.aaaa_error=NOERROR
+      (A Records found: 116.202.120.186);
+    x-tls=pass smtp.version=TLSv1.3 smtp.cipher=TLS_AES_256_GCM_SHA384
+      smtp.bits=256/256;
+    x-vs=commercial:mce score=17 state=11
+Authentication-Results: mx6.messagingengine.com;
+    x-csa=none;
+    x-me-sender=none;
+    x-ptr=pass smtp.helo=crm-int-01.torproject.org
+      policy.ptr=crm-int-01.torproject.org
+Authentication-Results: mx6.messagingengine.com;
+    bimi=skipped (DMARC did not pass)
+Authentication-Results: mx6.messagingengine.com;
+    arc=none (no signatures found)
+Authentication-Results: mx6.messagingengine.com;
+    dkim=none (no signatures found);
+    dmarc=none policy.published-domain-policy=none
+      policy.applied-disposition=none policy.evaluated-disposition=none
+      (p=none,d=none,d.eval=none) policy.policy-from=p
+      header.from=torproject.org;
+    iprev=pass smtp.remote-ip=116.202.120.186 (crm-int-01.torproject.org);
+    spf=softfail
+      smtp.mailfrom=
+      civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org
+      smtp.helo=crm-int-01.torproject.org
+X-ME-VSSU: VW5zdWI9aHR0cHM6Ly9kb25hdGUtYXBpLnRvcnByb2plY3Qub3JnL2Npdmljcm0vbWFpbG
+    luZy9vcHRvdXQ_cmVzZXQ9MSZqaWQ9MzQwNyZxaWQ9MTI1MjQ4MDUmaD1lZWNmMDc5Nzgy
+    YmMxYzlh
+X-ME-VSSU: VW5zdWI9aHR0cHM6Ly9kb25hdGUtYXBpLnRvcnByb2plY3Qub3JnL2Npdmljcm0vbWFpbG
+    luZy91bnN1YnNjcmliZT9yZXNldD0xJmppZD0zNDA3JnFpZD0xMjUyNDgwNSZoPWVlY2Yw
+    Nzk3ODJiYzFjOWE
+X-ME-VSSU: VW5zdWI9bWFpbHRvOmNpdmljcm0rdS4zNDA3LjEyNTI0ODA1LmVlY2YwNzk3ODJiYzFjOW
+    FAY3JtLnRvcnByb2plY3Qub3Jn
+X-ME-VSCause: gggruggvucftvghtrhhoucdtuddrgedvvddrgeeggdejgecutefuodetggdotefrodftvf
+    curfhrohhfihhlvgemucfhrghsthforghilhdpggftfghnshhusghstghrihgsvgdpuffr
+    tefokffrpgfnqfghnecuuegrihhlohhuthemuceftddtnecundfotefknffkpffiucdlud
+    ejmdenucfjughrpefvufggrhfhjfhptgesrgdttdertddtjeenucfhrhhomhepfdfvhhgv
+    ucfvohhrucfrrhhojhgvtghtfdcuoehnvgifshhlvghtthgvrhesthhorhhprhhojhgvtg
+    htrdhorhhgqeenucggtffrrghtthgvrhhnpeekvdehffdtudektdettdehgeduudetudeh
+    uedthfffjeekveevteejgeduleegveenucffohhmrghinhepthhorhhprhhojhgvtghtrd
+    horhhgpdgrshhpihhrrghtihhonhhtvggthhdrohhrghdpthifihhtthgvrhdrtghomhdp
+    rhhosghgjhgrnhhsvghnrdgtohhmpdhushgvnhhigidrohhrghdpthhorhhprhhojhgvtg
+    htrdhnvghtpdiiughnvghtrdgtohhmpdgtohhinhguvghskhdrtghomhdpvghffhdrohhr
+    ghdpvghpihgtrdhorhhgpdhhrhifrdhorhhgpdhmvgguihhumhdrtghomhdpfhgrtggvsg
+    hoohhkrdgtohhmpdhinhhsthgrghhrrghmrdgtohhmnecukfhppeduudeirddvtddvrddu
+    vddtrddukeeinecuvehluhhsthgvrhfuihiivgeptdenucfrrghrrghmpehinhgvthepud
+    duiedrvddtvddruddvtddrudekiedphhgvlhhopegtrhhmqdhinhhtqddtuddrthhorhhp
+    rhhojhgvtghtrdhorhhgpdhmrghilhhfrhhomhepoegtihhvihgtrhhmodgsrdefgedtje
+    druddvhedvgeektdehrdgvvggtfhdtjeeljeekvdgstgdutgelrgestghrmhdrthhorhhp
+    rhhojhgvtghtrdhorhhgqe
+X-ME-VSScore: 17
+X-ME-VSCategory: commercial:mce
+X-ME-CSA: none
+Received-SPF: softfail
+    (crm.torproject.org: Sender is not authorized by default to use 'civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org' in 'mfrom' identity, however domain is not currently prepared for false failures (mechanism '~all' matched))
+    receiver=mx6.messagingengine.com;
+    identity=mailfrom;
+    envelope-from="civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org";
+    helo=crm-int-01.torproject.org;
+    client-ip=116.202.120.186
+Received: from crm-int-01.torproject.org (crm-int-01.torproject.org [116.202.120.186])
+	(using TLSv1.3 with cipher TLS_AES_256_GCM_SHA384 (256/256 bits)
+	 key-exchange X25519 server-signature RSA-PSS (2048 bits) server-digest SHA256)
+	(No client certificate requested)
+	by mx6.messagingengine.com (Postfix) with ESMTPS
+	for <lists@outv.im>; Wed,  2 Feb 2022 00:12:03 -0500 (EST)
+Received: by crm-int-01.torproject.org (Postfix, from userid 33)
+	id D4454105A4C; Wed,  2 Feb 2022 05:12:01 +0000 (UTC)
+To: Anonymous Subscription <lists@outv.im>, Test 2 <aiwara@mylist.outv.im>
+Subject: Tor News | Tor Browser's legacy in privacy, 2021 fundraising results,  new Arti release
+MIME-Version: 1.0
+Reply-To: "The Tor Project" <newsletter@torproject.org>
+From: "The Tor Project" <newsletter@torproject.org>
+List-Unsubscribe: <mailto:civicrm+u.3407.12524805.eecf079782bc1c9a@crm.torproject.org>
+job_id: 3407
+Precedence: bulk
+X-CiviMail-Bounce: civicrm+b.3407.12524805.eecf079782bc1c9a@crm.torproject.org
+Content-Type: multipart/alternative;
+ boundary="=_09605c164aafdd3087553e88dd9d3c58"
+Date: Tue, 01 Feb 2022 21:12:01 -0800
+Message-Id: <20220202051201.D4454105A4C@crm-int-01.torproject.org>
+
+--=_09605c164aafdd3087553e88dd9d3c58
+Content-Transfer-Encoding: 8bit
+Content-Type: text/plain; charset=utf-8
+
+View this email in your browser: https://newsletter.torproject.org/archive/2022-02-01-tor-browser-legacy-in-privacy-2021-fundraising-new-arti/text/
+
+// Tor Browser: a legacy of advancing private browsing innovation //
+https://blog.torproject.org/tor-browser-advancing-privacy-innovation/
+
+You probably know that our user-facing product for providing privacy, safety, and security online is Tor Browser. Tor Browser allows millions of people to easily exercise their human right to privacy, within the framework of a familiar web browser.
+
+For many years, Tor Browser was the only web browser available that provided anything like its level of anti-tracking, anti-fingerprinting, and holistic privacy protections.
+
+Today, we want to share a little bit of Tor Browser history with you--the origins of our features and designs, and how many of our innovative privacy and security features have been adopted by other browsers. Read about the history of Tor Browser, and what's still left to do, on our blog: https://blog.torproject.org/tor-browser-advancing-privacy-innovation/.
+
+// 2021 Fundraising results: thank you!  //
+https://blog.torproject.org/fundraising-2021-results/
+
+During the last months of each year, the Tor Project (a 501(c)(3) nonprofit) holds a fundraiser to ask for your support. Letâ€™s start with the basicsâ€”first being THANK YOU to everyone who contributed to this campaign! We want to share some of the results of this effort.
+
+Last year during the same fundraising period, you contributed $376,315. This year, you contributed $940,361 towards helping people exercise their human right to privacy. Year over year, thatâ€™s a 150% increase! This includes a generous match from our Friends of Torâ€”Aspiration, Jon Callas, Craig Newmark, Jesse Powell, Wendy Seltzer, and several anonymous supporters.
+
+Last year, you donated $58,296 in cryptocurrency. This year, about 58% of the total amount you contributed came to us in the form of cryptocurrencies, for a total of $548,647â€”thatâ€™s an 841% increase. Wow! Find out more about fundraising in 2021 at the Tor Project on our blog: https://blog.torproject.org/fundraising-2021-results/.
+
+// New Foundations for Tor Network Experimentation //
+https://blog.torproject.org/new-foundations-tor-network-experimentation/
+
+Network experimentation is of vital importance to the Tor Project's research, development, and deployment processes. Experiments help us understand and estimate the viability of new research ideas, to test out newly written code, and to measure the real world effects of new features. Measurements taken during experiments help us gain confidence that Tor is working how we expect it should be.
+
+Justin Tracey, Ian Goldberg, and Rob Jansen recently published work--Once is Never Enough: Foundations for Sound Statistical Inference in Tor Network Experimentation--that makes it easier to run Tor network experiments under simulation and helps us do a better job of quantifying confidence in simulation results. The research article, video presentation, and slides are available online.
+
+To learn more about this research, read a summary of the article on our blog: https://blog.torproject.org/new-foundations-tor-network-experimentation/.
+
+// Arti 0.0.3 is released: Configuration, predictive circuits, and more! //
+https://blog.torproject.org/arti_003_released/
+
+Arti is our ongoing project to create a working embeddable Tor client in Rust. Itâ€™s nowhere near ready to replace the main Tor implementation in C, but we believe that itâ€™s the future.
+
+We're working towards our 0.1.0 milestone in early March, where our main current priorities are stabilizing our APIs, and resolving issues that prevent integration. We're planning to do releases every month or so until we get to that milestone.
+
+We need your help! We need feedback on our APIs. Sure, we think we're making them more complete and ergonomicâ€¦ but it's the users' opinion that matters! Check out how to give feedback on Arti, and find out what's new in the latest release, on our blog.
+
+// New Releases //
+
+Arti 0.0.4
+https://blog.torproject.org/arti_004_released/
+(Feb. 1) Refactoring, rustls, and more!
+
+Tor Browser 11.5a3 (Android)
+https://blog.torproject.org/new-release-tor-browser-115a3/
+(Jan. 27) Tor Browser 11.5a3 updates Firefox to 94.1.1 and includes bugfixes and stability improvements.
+
+Tor Browser 11.5a2 (Windows, macOS, Linux)
+https://blog.torproject.org/new-release-tor-browser-115a2/
+(Jan. 26) Tor Browser 11.5a2 updates Firefox to 91.5.0esr and includes bugfixes and stability improvements. Additionally, the browser landing page gets the usual Tor Browser look and feel back, removing the parts of our year end donation campaign.
+
+Tor Release 0.3.5.18
+https://forum.torproject.net/t/release-0-3-5-18/1871
+(Jan. 24) This is the very last release of the 0.3.5.x series as it is end-of-life on February 1st, 2022. We strongly recommend anyone still on 0.3.5.x to update to our latest stable which is currently 0.4.6.9.
+
+Arti 0.0.3
+https://blog.torproject.org/arti_003_released/
+(Jan. 14) Configuration, predictive circuits, and more!
+
+Tor Browser 11.0.4
+https://blog.torproject.org/new-release-tor-browser-1104/
+(Jan. 11) This version includes important security updates to Firefox. Tor Browser 11.0.4 updates Firefox to 91.5.0esr and gives our landing page the usual Tor Browser look and feel back, removing the parts of our year end donation campaign.
+
+// What We're Reading //
+
+Tor Project battles Russian censorship through the courts, ZDNet.
+https://www.zdnet.com/article/tor-project-battles-russian-censorship-through-the-courts/
+
+Chelsea Manning on the Sad State of Online Privacy, Coindesk.
+https://www.coindesk.com/layer2/privacyweek/2022/01/24/chelsea-manning-on-the-sad-state-of-online-privacy/
+
+The U.K. Paid $724,000 For A Creepy Campaign To Convince People That Encryption is Bad. It Wonâ€™t Work, EFF.
+https://www.eff.org/deeplinks/2022/01/uk-paid-724000-creepy-campaign-convince-people-encryption-bad-it-wont-work
+
+Preserving Community Control of Police Surveillance is Essential to Protect Privacy, EPIC.
+https://epic.org/preserving-community-control-of-police-surveillance-is-essential-to-protect-privacy/
+
+Human Rights Watch Among Pegasus Spyware Targets, HRW.
+https://www.hrw.org/news/2022/01/26/human-rights-watch-among-pegasus-spyware-targets
+
+â€œWe Can Work Together as One, We Have the Power to Push Backâ€: An Interview with Alison Macrina of Library Freedom Project, the Calyx Institute.
+https://medium.com/@calyxinsta/we-can-work-together-as-one-we-have-the-power-to-push-back-an-interview-with-alison-macrina-of-baf10a09ecaa
+
+// We're Hiring //
+
+Bookkeeper - Payroll Specialist
+https://www.torproject.org/about/jobs/bookkeeper-payroll/
+
+Director of Engineering
+https://www.torproject.org/about/jobs/director-of-engineering/
+
+// Join Our Community // 
+
+Getting involved with Tor is easy. Run a relay to make the network faster and more decentralized: https://community.torproject.org/relay/
+
+Run a bridge to help censored users access Tor: https://blog.torproject.org/run-tor-bridges-defend-open-internet
+
+Learn about more opportunities to start collaborating: https://community.torproject.org/
+
+Donate to help keep Tor fast, strong, and secure. https://torproject.org/donate/donate-phr-tn1
+
+--
+The Tor Project is a US 501(c)(3) non-profit organization advancing human rights and freedoms by creating and deploying free and open-source anonymity and privacy technologies, supporting their unrestricted availability and use, and furthering their scientific and popular understanding.
+
+Twitter: https://twitter.com/torproject
+Facebook: https://facebook.com/torproject
+Instagram: https://instagram.com/torproject
+Mastodon: http://mastodon.social/@torproject
+Tor Forum: https://forum.torproject.net/
+
+Unsubscribe from Tor News: https://donate-api.torproject.org/civicrm/mailing/unsubscribe?reset=1&jid=3407&qid=12524805&h=eecf079782bc1c9a
+Opt out of all emails from the Tor Project: https://donate-api.torproject.org/civicrm/mailing/optout?reset=1&jid=3407&qid=12524805&h=eecf079782bc1c9a
+
+217 First Avenue South #4903
+Seattle, WA 98194
+United States
+
+--=_09605c164aafdd3087553e88dd9d3c58
+Content-Transfer-Encoding: 8bit
+Content-Type: text/html; charset=utf-8
+
+<meta content="text/html; charset=utf-8" http-equiv="Content-Type" /><meta content="width=device-width, initial-scale=1.0" name="viewport" />
+<title></title>
+<style type="text/css">v
+    /* Client-specific Styles */
+    #outlook a {padding:0;} /* Force Outlook to provide a "view in browser" menu link. */
+    body{width:100% !important; -webkit-text-size-adjust:100%; -ms-text-size-adjust:100%; margin:0; padding:0;}
+h1 {font-family: Source Sans Pro, Helvetica, arial, sans-serif; font-size: 23px; color:#7d4698; text-align:left; line-height: 32px; padding-bottom:15px;}
+	h2 {font-family: Source Sans Pro, Helvetica, arial, sans-serif; font-size: 18px; color:#7d4698; text-align:left; line-height: 26px; padding-bottom: 5px;}
+	h4 {font-family: Source Sans Pro, Helvetica, arial, sans-serif; font-size: 16px; color:#7d4698; text-align:left; line-height: 21px; padding:5px 15px;}
+    p {font-family: Source sans pro, Helvetica, arial, sans-serif; font-size: 16px; color: #484848; text-align:left; line-height: 18px; padding-bottom:5px;}
+
+    /* Prevent Webkit and Windows Mobile platforms from changing default font sizes, while not breaking desktop design. */
+    .ExternalClass {width:100%;} /* Force Hotmail to display emails at full width */
+    .ExternalClass, .ExternalClass p, .ExternalClass span, .ExternalClass font, .ExternalClass td, .ExternalClass div {line-height: 100%;} /* Force Hotmail to display normal line spacing. */
+    #backgroundTable {margin:0; padding:0; width:100% !important; line-height: 100% !important;}
+    img {outline:none; text-decoration:none;border:none; -ms-interpolation-mode: bicubic;}
+    a img {border:none;}
+    .image_fix {display:block;}
+	h1 {font-family: Source Sans Pro, Helvetica, arial, sans-serif; font-size: 23px; color:#7d4698; text-align:left; line-height: 32px; padding-bottom: 15px;}
+	h2 {font-family: Source Sans Pro, Helvetica, arial, sans-serif; font-size: 18px; color:#7d4698; text-align:left; line-height: 26px; padding-bottom:5px;}
+	h4 {font-family: Source Sans Pro, Helvetica, arial, sans-serif; font-size: 16px; color:#7d4698; text-align:left; line-height: 24px; padding:5px 15px;}
+    p {font-family: Source sans pro, Helvetica, arial, sans-serif; font-size: 16px; color: #484848; text-align:left; line-height: 21px; padding-bottom:5px;}
+    table td {border-collapse: collapse;}
+    table { border-collapse:collapse; mso-table-lspace:0pt; mso-table-rspace:0pt; }
+    a {text-decoration: none;color:#7d4698;}
+
+    /*STYLES*/
+    table[class=full] { width: 100%; clear: both; }
+    a {text-decoration: none;color:#7d4698;}
+
+    /*IPAD STYLES*/
+    @media only screen and (max-width: 640px) {
+    a[href^="tel"], a[href^="sms"] {text-decoration: none;color:#7d4698;pointer-events: none;cursor: default;}
+    .mobile_link a[href^="tel"], .mobile_link a[href^="sms"] {text-decoration: default;color:#7d4698;pointer-events: auto;cursor: default;}
+    table[class=devicewidth] {width: 440px!important;text-align:center!important;}
+    table[class=devicewidthmob] {width: 416px!important;text-align:center!important;}
+    table[class=devicewidthinner] {width: 416px!important;text-align:center!important;}
+    img[class=banner] {width: 440px!important;auto!important;}
+    img[class=col2img] {width: 440px!important;height:auto!important;}
+    table[class="cols3inner"] {width: 100px!important;}
+    table[class="col3img"] {width: 131px!important;}
+    img[class="col3img"] {width: 131px!important;height: auto!important;}
+    table[class="removeMobile"]{width:10px!important;}
+    img[class="blog"] {width: 440px!important;height: auto!important;}
+    }
+
+    /*IPHONE STYLES*/
+    @media only screen and (max-width: 480px) {
+    a[href^="tel"], a[href^="sms"] {text-decoration: none;color: #7d4698;pointer-events: none;cursor: default;}
+    .mobile_link a[href^="tel"], .mobile_link a[href^="sms"] {text-decoration: none;color:#7d4698;pointer-events: auto;cursor: default;}
+
+    table[class=devicewidth] {width: 280px!important;text-align:center!important;}
+    table[class=devicewidthmob] {width: 260px!important;text-align:center!important;}
+    table[class=devicewidthinner] {width: 260px!important;text-align:center!important;}
+    img[class=banner] {width: 280px!important;height:100px!important;}
+    img[class=col2img] {width: 280px!important;height:auto!important;}
+    table[class="cols3inner"] {width: 260px!important;}
+    img[class="col3img"] {width: 280px!important;height: auto!important;}
+    table[class="col3img"] {width: 280px!important;}
+    img[class="blog"] {width: 280px!important;auto!important;}
+    td[class="padding-top-right15"]{padding:15px 15px 0 0 !important;}
+    td[class="padding-right15"]{padding-right:15px !important;}
+    }
+
+    @media only screen and (max-device-width: 800px)
+    {td[class="padding-top-right15"]{padding:15px 15px 0 0 !important;}
+    td[class="padding-right15"]{padding-right:15px !important;}}
+    @media only screen and (max-device-width: 769px) {
+    .devicewidthmob {font-size:16px;}
+    }
+
+    @media only screen and (max-width: 640px) {
+    .desktop-spacer {display:none !important;}
+ }
+  
+</style>
+<!-- Start of preheader --><!-- Start of preheader -->
+<table bgcolor="#7d4698" border="0" cellpadding="0" cellspacing="0" id="backgroundTable" width="100%">
+	<tbody>
+		<tr>
+			<td>
+			<table align="center" border="0" cellpadding="0" cellspacing="0" class="devicewidth" width="650">
+				<tbody>
+					<tr>
+						<td width="100%"><a href="https://newsletter.torproject.org/archive/2022-02-01-tor-browser-legacy-in-privacy-2021-fundraising-new-arti/"><span style="font-family: Source sans pro, Helvetica, arial, sans-serif; font-size: 12px; text-align:left; line-height: 16px; padding:5px; color: #ffffff;">Updates and opportunities from the Tor Project | View this email in your browser</span></a></td>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<!-- End of main-banner-->
+
+<table align="center" border="0" cellpadding="0" cellspacing="0" class="devicewidth" width="650">
+	<tbody>
+		<tr>
+			<td width="100%">
+			<table align="center" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" class="devicewidth" width="680">
+				<tbody><!-- Spacing -->
+					<tr>
+						<td height="20" width="100%"><a href="https://torproject.org"><img alt="tor-news-logo" src="https://blog.torproject.org/sites/default/files/inline-images/tor-news-logo-560.png" style="width: 250px; height: 75px;" /></a></td>
+					</tr>
+					<tr>
+						<td>
+						<table align="center" bgcolor="#ffffff" border="0" cellpadding="0" cellspacing="0" class="devicewidth" width="650">
+							<tbody><!-- /Spacing --><!-- Spacing --><!-- /Spacing --><!-- content -->
+								<tr>
+									<td style="padding:0 15px 15px 15px;">
+									<h1 class="title"><a href="https://blog.torproject.org/tor-browser-advancing-privacy-innovation/">Tor Browser: a legacy of advancing private browsing innovation</a></h1>
+
+									<p><a href="https://blog.torproject.org/tor-browser-advancing-privacy-innovation/"><img alt="" src="https://newsletter.torproject.org/gallery/tor-browser-innovation.jpg" style="width: 675px; height: 380px;" /></a></p>
+
+									<p>You probably know that our user-facing product for providing privacy, safety, and security online is Tor Browser. Tor Browser allows millions of people to easily exercise their human right to privacy, within the framework of a familiar web browser.</p>
+
+									<p>For many years, Tor Browser was the only web browser available that provided anything like its level of anti-tracking, anti-fingerprinting, and holistic privacy protections.</p>
+
+									<p>Today, we want to share a little bit of Tor Browser history with you--the origins of our features and designs, and how many of our innovative privacy and security features have been adopted by other browsers. <a href="https://blog.torproject.org/tor-browser-advancing-privacy-innovation/">Read about the history of Tor Browser, and what&#39;s still left to do, on our blog</a>.</p>
+
+									<hr />
+									<div class="css-1dbjc4n">
+									<div class="css-1dbjc4n r-1s2bzr4">
+									<h1 class="title"><a href="https://blog.torproject.org/fundraising-2021-results/">2021 Fundraising results: thank you!</a></h1>
+
+									<p><a href="https://blog.torproject.org/fundraising-2021-results/"><img alt="" src="https://newsletter.torproject.org/gallery/yec-2022-thank-you.png" style="width: 675px; height: 375px;" /></a></p>
+
+									<p>During the last months of each year, the Tor Project (a 501(c)(3) nonprofit) holds a fundraiser to ask for your support. Let&rsquo;s start with the basics&mdash;first being THANK YOU to everyone who contributed to this campaign! We want to share some of the results of this effort.</p>
+
+									<p><a href="https://blog.torproject.org/use-a-mask-use-tor-thank-you/">Last year during the same fundraising period</a>, you contributed $376,315. This year, you contributed $940,361 towards helping people exercise their human right to privacy. Year over year, that&rsquo;s a 150% increase! This includes a generous match from our Friends of Tor&mdash;<a href="https://aspirationtech.org/">Aspiration</a>, <a href="https://twitter.com/joncallas">Jon Callas</a>, <a href="https://twitter.com/craignewmark">Craig Newmark</a>, <a href="https://twitter.com/jespow">Jesse Powell</a>, <a href="https://twitter.com/wseltzer">Wendy Seltzer</a>, and several anonymous supporters.</p>
+
+									<p>Last year, you donated $58,296 in cryptocurrency. This year, about 58% of the total amount you contributed came to us in the form of cryptocurrencies, for a total of $548,647&mdash;that&rsquo;s an 841% increase. Wow! <a href="https://blog.torproject.org/fundraising-2021-results/">Find out more about fundraising in 2021 at the Tor Project on our blog</a>.</p>
+
+									<hr />
+									<h1 class="title"><a href="https://blog.torproject.org/tor-browser-advancing-privacy-innovation/">New Foundations for Tor Network Experimentation</a></h1>
+
+									<p><a href="https://blog.torproject.org/new-foundations-tor-network-experimentation/"><img alt="" src="https://newsletter.torproject.org/gallery/shadow-logo.png" style="width: 675px; height: 352px;" /></a></p>
+
+									<p>Network experimentation is of vital importance to the Tor Project&#39;s research, development, and deployment processes. Experiments help us understand and estimate the viability of new research ideas, to test out newly written code, and to measure the real world effects of new features. Measurements taken during experiments help us gain confidence that Tor is working how we expect it should be.</p>
+
+									<p>Justin Tracey, Ian Goldberg, and <a href="https://www.robgjansen.com">Rob Jansen</a> recently published work--<em>Once is Never Enough: Foundations for Sound Statistical Inference in Tor Network Experimentation</em>--that makes it easier to run Tor network experiments under simulation and helps us do a better job of quantifying confidence in simulation results. The <a href="https://www.usenix.org/conference/usenixsecurity21/presentation/jansen">research article, video presentation, and slides are available online</a>.</p>
+
+									<p><a href="https://blog.torproject.org/new-foundations-tor-network-experimentation/">To learn more about this research, read a summary of the article on our blog</a>.</p>
+
+									<div class="css-901oao r-1fmj7o5 r-1qd0xha r-1blvdjr r-16dba41 r-ad9z0x r-bcqeeo r-bnwqim r-qvutc0" dir="auto" lang="en">
+									<hr />
+									<h1 class="title"><a href="https://blog.torproject.org/arti_003_released/">Arti 0.0.3 is released: Configuration, predictive circuits, and more!</a></h1>
+									</div>
+									</div>
+									</div>
+
+									<p data-sourcepos="1:1-1:203" dir="auto"><a href="https://blog.torproject.org/arti_003_released/"><img alt="" src="https://newsletter.torproject.org/gallery/arti-logo.png" style="width: 675px; height: 221px;" /></a></p>
+
+									<div>
+									<p class="font-family-serif">Arti is our ongoing project to create a working embeddable Tor client in Rust. It&rsquo;s nowhere near ready to replace the main Tor implementation in C, but we believe that it&rsquo;s the future.</p>
+
+									<p class="font-family-serif">We&#39;re working towards our 0.1.0 milestone in early March, where our main current priorities are stabilizing our APIs, and resolving issues that prevent integration. We&#39;re planning to do releases every month or so until we get to that milestone.</p>
+
+									<p class="font-family-serif"><strong>We need your help! We need feedback on our APIs. </strong>Sure, <em>we</em> think we&#39;re making them more complete and ergonomic&hellip; but it&#39;s the users&#39; opinion that matters! <a href="https://blog.torproject.org/arti_003_released/">Check out how to give feedback on Arti, and find out what&#39;s new in the latest release, on our blog</a>.</p>
+									</div>
+
+									<hr />
+									<h1>New Releases</h1>
+
+									<p><a href="https://blog.torproject.org/arti_004_released/">Arti 0.0.4</a><br />
+									(Feb. 1) Refactoring, rustls, and more!</p>
+
+									<p><a href="https://blog.torproject.org/new-release-tor-browser-115a3/">Tor Browser 11.5a3 (Android)</a><br />
+									(Jan. 27) Tor Browser 11.5a3 updates Firefox to 94.1.1 and includes bugfixes and stability improvements.</p>
+
+									<p class="title"><a href="https://blog.torproject.org/new-release-tor-browser-115a2/">Tor Browser 11.5a2 (Windows, macOS, Linux)</a><br />
+									(Jan. 26) Tor Browser 11.5a2 updates Firefox to 91.5.0esr and includes bugfixes and stability improvements. Additionally, the browser landing page gets the usual Tor Browser look and feel back, removing the parts of our year end donation campaign.</p>
+
+									<p><a href="https://forum.torproject.net/t/release-0-3-5-18/1871">Tor Release 0.3.5.18</a><br />
+									(Jan. 24) This is the very last release of the 0.3.5.x series as it is end-of-life on February 1st, 2022. We strongly recommend anyone still on 0.3.5.x to update to our latest stable which is currently 0.4.6.9.</p>
+
+									<p class="title"><a href="https://blog.torproject.org/arti_003_released/">Arti 0.0.3</a><br />
+									(Jan. 14) Configuration, predictive circuits, and more!</p>
+
+									<p><a href="https://blog.torproject.org/new-release-tor-browser-1104/">Tor Browser 11.0.4</a><br />
+									(Jan. 11) This version includes important security updates to Firefox. Tor Browser 11.0.4 updates Firefox to 91.5.0esr and gives our landing page the usual Tor Browser look and feel back, removing the parts of our year end donation campaign.</p>
+
+									<hr />
+									<h1>What We&#39;re Reading</h1>
+
+									<p>
+									<style type="text/css"><!--td br -->
+									</style>
+									<a href="https://www.zdnet.com/article/tor-project-battles-russian-censorship-through-the-courts/">Tor Project battles Russian censorship through the courts</a>, ZDNet.</p>
+
+									<p class="panel-pane pane-page-title"><a href="https://www.coindesk.com/layer2/privacyweek/2022/01/24/chelsea-manning-on-the-sad-state-of-online-privacy/">Chelsea Manning on the Sad State of Online Privacy</a>, Coindesk.</p>
+
+									<p><a href="https://www.eff.org/deeplinks/2022/01/uk-paid-724000-creepy-campaign-convince-people-encryption-bad-it-wont-work">The U.K. Paid $724,000 For A Creepy Campaign To Convince People That Encryption is Bad. It Won&rsquo;t Work</a>, EFF.</p>
+
+									<p><a href="https://epic.org/preserving-community-control-of-police-surveillance-is-essential-to-protect-privacy/">Preserving Community Control of Police Surveillance is Essential to Protect Privacy</a>, EPIC.</p>
+
+									<p><a href="https://www.hrw.org/news/2022/01/26/human-rights-watch-among-pegasus-spyware-targets">Human Rights Watch Among Pegasus Spyware Targets</a>, HRW.</p>
+
+									<div>
+									<p class="hc hd he cg hf hg hh hi hj hk hl hm hn ho hp hq hr hs ht hu hv hw hx hy hz ia fq" data-selectable-paragraph="" id="2aa2"><a href="https://medium.com/@calyxinsta/we-can-work-together-as-one-we-have-the-power-to-push-back-an-interview-with-alison-macrina-of-baf10a09ecaa">&ldquo;We Can Work Together as One, We Have the Power to Push Back&rdquo;: An Interview with Alison Macrina of Library Freedom Project</a>, the Calyx Institute.</p>
+									</div>
+
+									<hr />
+									<h1>We&#39;re Hiring</h1>
+
+									<p><a href="https://www.torproject.org/about/jobs/bookkeeper-payroll/">Bookkeeper - Payroll Specialist</a></p>
+
+									<p class="mb-0"><a href="https://www.torproject.org/about/jobs/director-of-engineering/">Director of Engineering</a></p>
+
+									<hr />
+									<h1>Join Our Community</h1>
+
+									<p>Getting involved with Tor is easy. <a href="https://community.torproject.org/relay/">Run a relay</a> to make the network faster and more decentralized. <a href="https://blog.torproject.org/run-tor-bridges-defend-open-internet">Run a bridge</a> to help censored users access Tor.</p>
+
+									<p>Learn about each of our <a href="https://gitlab.torproject.org/tpo/team/-/wikis/home">teams </a>and start collaborating.</p>
+
+									<p><a href="https://torproject.org/donate/donate-phr-tn1">Donate</a> to help keep Tor fast, strong, and secure.</p>
+
+									<div style="background-color: #7d4698; padding: 6px 8px 6px 8px;
+-webkit-border-radius:3px; border-radius:3px; margin: 0 auto; width:200px; text-align: center;"><em><a href="https://torproject.org/donate/donate-phr-tn1" style="font-size: 24px; font-family: Source sans pro, Helvetica, Arial, sans-serif; font-weight: bold; color: #ffffff; text-decoration: none; display:inline-block;" target="_blank">DONATE</a></em></div>
+									</td>
+								</tr>
+								<tr>
+									<td style="padding:0 15px;">
+									<p>The Tor Project is a US 501(c)(3) non-profit organization advancing human rights and freedoms by creating and deploying free and open-source anonymity and privacy technologies, supporting their unrestricted availability and use, and furthering their scientific and popular understanding.</p>
+
+									<hr />
+									<p><a href="https://facebook.com/torproject"><img alt="" src="https://blog.torproject.org/sites/default/files/inline-images/facebook.png" style="width: 22px; height: 25px; margin: 3px;" /></a><a href="https://twitter.com/torproject">&nbsp;<img alt="tor-twitter" src="https://blog.torproject.org/sites/default/files/inline-images/twitter.png" style="width: 25px; height: 25px; margin: 3px;" /></a><a href="https://instagram.com/torproject">&nbsp;<img alt="tor-insta" src="https://blog.torproject.org/sites/default/files/inline-images/instagram.png" style="width: 22px; height: 25px; margin: 3px;" /></a><a href="https://forum.torproject.net/"><img alt="" src="https://blog.torproject.org/sites/default/files/inline-images/discourse.png"
+style="margin: 3px; width: 22px; height: 25px;" /></a></p>
+
+									<p><small><a href="https://donate-api.torproject.org/civicrm/mailing/unsubscribe?reset=1&jid=3407&qid=12524805&h=eecf079782bc1c9a">Unsubscribe from Tor News</a> | <a href="https://donate-api.torproject.org/civicrm/mailing/optout?reset=1&jid=3407&qid=12524805&h=eecf079782bc1c9a">Opt out of all emails from the Tor Project</a><br />
+									<div class="location vcard"><span class="adr"><span class="street-address">217 First Avenue South #4903</span><br /><span class="locality">Seattle</span>, <span class="region">WA</span> <span class="postal-code">98194</span><br /><span class="country-name">United States</span></span></div><br />
+									<a href="https://torproject.org">torproject.org</a></small></p>
+									</td>
+								</tr>
+							</tbody>
+						</table>
+						</td>
+					</tr>
+				</tbody>
+			</table>
+			</td>
+		</tr>
+	</tbody>
+</table>
+<!-- Spacing -->
+--=_09605c164aafdd3087553e88dd9d3c58--
+

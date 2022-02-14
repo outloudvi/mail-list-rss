@@ -1,7 +1,11 @@
-use std::env::var;
+use std::{env::var, fs};
 
 use anyhow::Result;
 use once_cell::sync::Lazy;
+use serde_json::from_str;
+use tracing::warn;
+
+use crate::rule::Rule;
 
 static CONFIG: Lazy<Config> = Lazy::new(|| Config::from_env().unwrap());
 
@@ -16,6 +20,7 @@ pub struct Config {
     pub web_domain: String,
     pub username: Option<String>,
     pub password: Option<String>,
+    pub rules: Vec<Rule>,
 }
 
 impl Config {
@@ -38,6 +43,25 @@ impl Config {
             }),
             username: var("AUTH_USERNAME").ok(),
             password: var("AUTH_PASSWORD").ok(),
+            rules: match var("RULE_FILE") {
+                Ok(path) => match fs::read_to_string(path) {
+                    Ok(text) => match from_str::<Vec<Rule>>(&text) {
+                        Ok(rules) => rules,
+                        Err(e) => {
+                            warn!("Error parsing rules: {}", e);
+                            vec![]
+                        }
+                    },
+                    Err(e) => {
+                        warn!("Error parsing rules: {}", e);
+                        vec![]
+                    }
+                },
+                Err(e) => {
+                    warn!("Error parsing rules: {}", e);
+                    vec![]
+                }
+            },
         };
 
         if ret.username.is_some() ^ ret.password.is_some() {

@@ -116,11 +116,10 @@ impl<'a> TryFrom<(&'a Vec<u8>, Message<'a>)> for Feed {
     type Error = anyhow::Error;
     fn try_from((raw, val): (&'a Vec<u8>, Message<'a>)) -> Result<Self> {
         let config = get_config();
-        let domain_suffix = format!("@{}", config.domain);
-        let mut receivers = val.get_to().to_vec();
-        if !receivers.iter().any(|x| x.contains(&domain_suffix)) {
-            bail!("Not sending to {}, blocked", config.domain)
-        }
+        let from_box = match get_box(&val) {
+            Some(x) => x,
+            None => bail!("Not sending to {}, blocked", config.domain),
+        };
         let author = match val.get_from() {
             HeaderValue::Address(addr) => match (addr.address.as_ref(), addr.name.as_ref()) {
                 (Some(addr), Some(name)) => format!("{} ({})", addr, name),
@@ -136,19 +135,13 @@ impl<'a> TryFrom<(&'a Vec<u8>, Message<'a>)> for Feed {
             .get_html_bodies()
             .flat_map(|x| x.get_contents().to_vec())
             .collect::<Vec<_>>();
-        receivers.sort();
-        let from_box = receivers
-            .iter()
-            .filter(|x| x.contains(&domain_suffix))
-            .next()
-            .unwrap();
         Ok(Feed {
             raw: String::from_utf8(raw.to_owned())?,
             content: String::from_utf8(content)?,
             created_at,
             title,
             author,
-            from_box: from_box.to_owned(),
+            from_box,
             id: nanoid::nanoid!(10),
         })
     }
@@ -168,6 +161,36 @@ pub async fn database_servo(collection: Feeds, rx: RX) {
     info!(target: "Database", "Stopping");
 }
 
+fn get_box(val: &Message) -> Option<String> {
+    let config = get_config();
+    let mut receivers = val.get_to().to_vec();
+    receivers.sort();
+
+    // Check "To" header against the domain
+    let domain_suffix = format!("@{}", config.domain);
+    let ret = receivers
+        .iter()
+        .filter(|x| x.contains(&domain_suffix))
+        .next();
+    if ret.is_some() {
+        return Some(ret.unwrap().to_owned());
+    }
+
+    // Check the rules
+    let rules = &config.rules;
+    return rules
+        .iter()
+        .filter(|rule| {
+            rule.filter
+                .iter()
+                .filter(|fl| fl.matches(&val))
+                .next()
+                .is_some()
+        })
+        .map(|x| x.to_box.to_owned())
+        .next();
+}
+
 #[derive(Deserialize, Serialize)]
 pub struct Summary {
     pub title: String,
@@ -181,7 +204,7 @@ pub struct List {
 
 #[test]
 fn test() {
-    const RAW: &str = include_str!("../data/dex-raw.txt");
+    const RAW: &str = include_str!("../sample.txt");
     let parsed = mail_parser::Message::parse(RAW.as_bytes()).unwrap();
     println!("{:#?}", parsed);
 }
