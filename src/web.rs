@@ -94,7 +94,8 @@ pub async fn web_server(collection: Feeds) -> Result<()> {
 
     let mut app = Router::new()
         .route("/", get(index))
-        .route("/feeds/:key", get(raw))
+        .route("/feeds/:key", get(rendered_html))
+        .route("/feeds/:key/raw", get(raw))
         .route("/feeds", get(list.layer(utf8_layer)))
         .route("/rss", get(rss))
         .route("/rss/:box", get(rss_box))
@@ -247,7 +248,7 @@ async fn render_list(feeds: Feeds) -> Result<List> {
     Ok(List { items: res })
 }
 
-async fn raw(
+async fn rendered_html(
     Path(map): Path<HashMap<String, String>>,
     Extension(feeds): Extension<Feeds>,
 ) -> impl IntoResponse {
@@ -258,6 +259,31 @@ async fn raw(
             StatusCode::OK,
             Headers(vec![(header::CONTENT_TYPE, "text/html; charset=utf-8")]),
             res.content,
+        ),
+        Ok(None) => (
+            StatusCode::NOT_FOUND,
+            Headers(vec![]),
+            format!("Cannot find {}", key),
+        ),
+        Err(e) => (
+            StatusCode::INTERNAL_SERVER_ERROR,
+            Headers(vec![]),
+            e.to_string(),
+        ),
+    }
+}
+
+async fn raw(
+    Path(map): Path<HashMap<String, String>>,
+    Extension(feeds): Extension<Feeds>,
+) -> impl IntoResponse {
+    let key = map.get("key").expect("key should exist");
+    let res = feeds.find_one(doc! { "id" : key }, None).await;
+    match res {
+        Ok(Some(res)) => (
+            StatusCode::OK,
+            Headers(vec![(header::CONTENT_TYPE, "text/plain; charset=utf-8")]),
+            res.raw,
         ),
         Ok(None) => (
             StatusCode::NOT_FOUND,
