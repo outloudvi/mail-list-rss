@@ -9,7 +9,8 @@ import './main.css'
     return
   }
 
-  await fetch(`${baseUrl}/feeds`)
+  const url = new URL(document.location.toString())
+  await fetch(`${baseUrl}/feeds${url.search}`)
     .then(x => x.json() as Promise<{ items: FeedSummary[] }>)
     .then(x => {
       x.items.forEach(x => {
