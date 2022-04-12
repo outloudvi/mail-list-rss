@@ -40,10 +40,7 @@ impl Config {
                     vec![]
                 }
             },
-            Err(e) => {
-                warn!("Error parsing rules: {}", e);
-                vec![]
-            }
+            Err(_e) => vec![],
         };
         let domain = var("DOMAIN").unwrap_or_else(|_| "example.com".to_owned());
         let ret = Self {
