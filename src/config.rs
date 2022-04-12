@@ -22,6 +22,7 @@ pub struct Config {
     pub password: Option<String>,
     pub rules: Vec<Rule>,
     pub disable_rcpt_filter: bool,
+    pub default_page_limit: i64,
 }
 
 impl Config {
@@ -72,6 +73,7 @@ impl Config {
                 .next()
                 .is_some(),
             rules,
+            default_page_limit: var("DEFAULT_PAGE_LIMIT").map_or_else(|_| Ok(30), |x| x.parse())?,
         };
 
         if ret.username.is_some() ^ ret.password.is_some() {

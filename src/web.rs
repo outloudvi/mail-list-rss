@@ -2,7 +2,7 @@ use std::{collections::HashMap, net::SocketAddr, str::FromStr};
 
 use anyhow::Result;
 use axum::{
-    extract::{Extension, Path},
+    extract::{Extension, Path, Query},
     handler::Handler,
     http::{
         header::{self, HeaderName, CONTENT_TYPE},
@@ -20,6 +20,7 @@ use mongodb::{
     bson::{doc, Document},
     options::{DistinctOptions, FindOptions},
 };
+use serde::Deserialize;
 use tower_http::{
     auth::RequireAuthorizationLayer,
     cors,
@@ -222,15 +223,24 @@ async fn render_feeds(feeds: Feeds, filter: Option<Document>, link: &str) -> Res
     Ok(ret)
 }
 
-async fn list(Extension(feeds): Extension<Feeds>) -> impl IntoResponse {
-    Json(render_list(feeds).await.unwrap())
+#[derive(Deserialize)]
+struct FeedsQuery {
+    limit: Option<i64>,
+    skip: Option<u64>,
 }
 
-async fn render_list(feeds: Feeds) -> Result<List> {
+async fn list(Extension(feeds): Extension<Feeds>, query: Query<FeedsQuery>) -> impl IntoResponse {
+    Json(render_list(feeds, query.limit, query.skip).await.unwrap())
+}
+
+async fn render_list(feeds: Feeds, limit: Option<i64>, skip: Option<u64>) -> Result<List> {
+    let config = get_config();
     let res = feeds
         .find(
             None,
             FindOptions::builder()
+                .limit(limit.unwrap_or(config.default_page_limit))
+                .skip(skip)
                 .sort(doc! { "created_at": -1 })
                 .build(),
         )
